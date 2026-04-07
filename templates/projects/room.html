@@ -1,0 +1,232 @@
+{% extends 'base.html' %}
+{% block title %}{{ project.title }}{% endblock %}
+
+{% block content %}
+<div class="container-lg" style="padding-top:32px;padding-bottom:48px">
+
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;flex-wrap:wrap">
+    <a href="/projects/" class="btn btn-ghost btn-sm">← Projects</a>
+    <span style="color:var(--text-muted)">/</span>
+    <span style="color:var(--text-secondary);font-size:0.9rem">{{ project.title }}</span>
+    <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap">
+      <span class="badge {% if project.difficulty == 'beginner' %}badge-success{% elif project.difficulty == 'intermediate' %}badge-warning{% else %}badge-danger{% endif %}">{{ project.get_difficulty_display }}</span>
+      <span class="badge {% if project.status == 'recruiting' %}badge-primary{% else %}badge-ghost{% endif %}">{{ project.get_status_display }}</span>
+      {% if project.privacy_level == 'private' %}<span class="badge badge-ghost">🔒 Private</span>{% endif %}
+    </div>
+  </div>
+
+  <div class="two-col">
+    <!-- LEFT: Main content -->
+    <div style="display:flex;flex-direction:column;gap:20px">
+
+      <!-- Project Info Card -->
+      <div class="card">
+        <h2 style="font-size:1.5rem;margin-bottom:8px">{{ project.title }}</h2>
+        {% if project.teaser %}
+        <p style="color:var(--primary-light);font-size:0.95rem;margin-bottom:12px;font-style:italic">{{ project.teaser }}</p>
+        {% endif %}
+        <p style="font-size:0.9rem;line-height:1.7">{{ project.description }}</p>
+        {% if show_full and project.full_description %}
+        <div style="margin-top:16px;padding:16px;background:rgba(99,102,241,0.05);border:1px solid rgba(99,102,241,0.15);border-radius:var(--radius-md)">
+          <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--primary-light);margin-bottom:8px">📋 Full Description (Members Only)</div>
+          <p style="font-size:0.875rem;line-height:1.7">{{ project.full_description }}</p>
+        </div>
+        {% endif %}
+        {% if project.required_skills %}
+        <div style="margin-top:14px">
+          <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em">Required Skills</div>
+          <div class="skills-list">
+            {% for skill in project.required_skills.split %}
+            <span class="skill-tag">{{ skill|cut:"," }}</span>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+        <div style="margin-top:14px;display:flex;gap:16px;flex-wrap:wrap;font-size:0.8rem;color:var(--text-muted)">
+          <span>👥 {{ project.get_member_count }}/{{ project.max_team_size }} members</span>
+          {% if project.deadline %}<span>📅 {{ project.deadline }}</span>{% endif %}
+          <span>📁 Created {{ project.created_at|date:"M j, Y" }}</span>
+        </div>
+      </div>
+
+      {% if is_member %}
+      <!-- CHAT -->
+      <div>
+        <div class="section-title">💬 Project Chat</div>
+        <div class="chat-container">
+          <div class="chat-messages" id="chat-messages">
+            {% for msg in chat_messages %}
+            <div class="chat-message {% if msg.user == user %}chat-message-self{% endif %}">
+              {% if msg.user != user %}
+              <div class="avatar avatar-sm" data-avatar-name="{{ msg.user.full_name }}" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">
+                {{ msg.user.get_avatar_initials }}
+              </div>
+              {% endif %}
+              <div>
+                {% if msg.user != user %}
+                <div style="font-size:0.72rem;color:var(--text-muted);margin-bottom:3px;font-weight:600">{{ msg.user.full_name }}</div>
+                {% endif %}
+                <div class="chat-bubble {% if msg.user == user %}chat-bubble-self{% else %}chat-bubble-other{% endif %}">{{ msg.content }}</div>
+                <div class="chat-meta" style="{% if msg.user == user %}text-align:right{% endif %}">{{ msg.created_at|date:"M j, g:i A" }}</div>
+              </div>
+            </div>
+            {% empty %}
+            <div style="text-align:center;padding:32px;color:var(--text-muted);font-size:0.875rem">No messages yet. Say hello! 👋</div>
+            {% endfor %}
+          </div>
+          <form method="post" class="chat-input-row">
+            {% csrf_token %}
+            <textarea name="content" class="chat-input" placeholder="Type a message... (Enter to send)" rows="1"
+                      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();this.form.submit()}"></textarea>
+            <button type="submit" class="btn btn-primary btn-sm">Send ↑</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- TASK BOARD -->
+      <div>
+        <div class="section-title">✅ Task Board</div>
+        <div class="task-columns">
+          <div class="task-col">
+            <div class="task-col-header" style="color:#94a3b8">📋 To Do</div>
+            {% for task in tasks %}{% if task.status == 'todo' %}
+            <div class="task-item">
+              <div style="font-weight:600;font-size:0.85rem;color:var(--text-primary);margin-bottom:3px">{{ task.title }}</div>
+              {% if task.description %}<div style="font-size:0.75rem;color:var(--text-muted)">{{ task.description|truncatechars:60 }}</div>{% endif %}
+              <form method="post" action="/projects/{{ project.id }}/tasks/{{ task.id }}/status/" style="margin-top:6px">
+                {% csrf_token %}
+                <button name="status" value="in_progress" class="btn btn-ghost btn-sm" style="font-size:0.7rem;padding:3px 8px">→ In Progress</button>
+              </form>
+            </div>
+            {% endif %}{% endfor %}
+          </div>
+          <div class="task-col">
+            <div class="task-col-header" style="color:#6366f1">⚡ In Progress</div>
+            {% for task in tasks %}{% if task.status == 'in_progress' %}
+            <div class="task-item">
+              <div style="font-weight:600;font-size:0.85rem;color:var(--text-primary);margin-bottom:3px">{{ task.title }}</div>
+              {% if task.description %}<div style="font-size:0.75rem;color:var(--text-muted)">{{ task.description|truncatechars:60 }}</div>{% endif %}
+              <form method="post" action="/projects/{{ project.id }}/tasks/{{ task.id }}/status/" style="margin-top:6px;display:flex;gap:4px">
+                {% csrf_token %}
+                <button name="status" value="todo" class="btn btn-ghost btn-sm" style="font-size:0.7rem;padding:3px 8px">← Back</button>
+                <button name="status" value="done" class="btn btn-success btn-sm" style="font-size:0.7rem;padding:3px 8px">✓ Done</button>
+              </form>
+            </div>
+            {% endif %}{% endfor %}
+          </div>
+          <div class="task-col">
+            <div class="task-col-header" style="color:#10b981">✅ Done</div>
+            {% for task in tasks %}{% if task.status == 'done' %}
+            <div class="task-item" style="opacity:0.7">
+              <div style="font-weight:600;font-size:0.85rem;color:var(--text-primary);text-decoration:line-through;margin-bottom:3px">{{ task.title }}</div>
+              <form method="post" action="/projects/{{ project.id }}/tasks/{{ task.id }}/status/" style="margin-top:6px">
+                {% csrf_token %}
+                <button name="status" value="todo" class="btn btn-ghost btn-sm" style="font-size:0.7rem;padding:3px 8px">↺ Reopen</button>
+              </form>
+            </div>
+            {% endif %}{% endfor %}
+          </div>
+        </div>
+        <form method="post" action="/projects/{{ project.id }}/tasks/add/" style="margin-top:14px;display:flex;gap:8px">
+          {% csrf_token %}
+          <input type="text" name="title" class="form-input" placeholder="Add a new task..." style="flex:1">
+          <button type="submit" class="btn btn-secondary">+ Add</button>
+        </form>
+      </div>
+
+      {% else %}
+      <!-- NOT MEMBER -->
+      <div class="card" style="text-align:center;padding:48px 32px">
+        <div style="font-size:3rem;margin-bottom:16px">🔐</div>
+        <h3 style="margin-bottom:8px">Members-Only Area</h3>
+        <p style="margin-bottom:24px;font-size:0.875rem">Join this project to access chat, tasks, and the full project room.</p>
+        {% if project.status == 'recruiting' %}
+        <a href="/projects/{{ project.id }}/join/" class="btn btn-primary btn-lg">✋ Request to Join</a>
+        {% else %}
+        <span class="badge badge-ghost" style="padding:10px 18px;font-size:0.875rem">Not Currently Recruiting</span>
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- RIGHT SIDEBAR -->
+    <div style="display:flex;flex-direction:column;gap:20px">
+
+      <!-- Members -->
+      <div class="card">
+        <div class="section-title">👥 Team ({{ project.get_member_count }}/{{ project.max_team_size }})</div>
+        {% for pm in members %}
+        <div style="display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">
+          <div class="avatar avatar-md" data-avatar-name="{{ pm.user.full_name }}" style="background:linear-gradient(135deg,#6366f1,#a78bfa)">{{ pm.user.get_avatar_initials }}</div>
+          <div style="flex:1;min-width:0">
+            <a href="/auth/profile/{{ pm.user.id }}/" style="font-weight:600;font-size:0.875rem;color:var(--text-primary);text-decoration:none">
+              {{ pm.user.full_name }}{% if pm.user == project.owner %} 👑{% endif %}
+            </a>
+            <div style="font-size:0.72rem;color:var(--text-muted)">{{ pm.role }}</div>
+          </div>
+          {% if pm.user.available_now %}<span class="available-dot"></span>{% endif %}
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Pending Join Requests (owner only) -->
+      {% if is_owner and join_requests %}
+      <div class="card">
+        <div class="section-title">📬 Join Requests</div>
+        {% for req in join_requests %}
+        <div style="padding:12px 0;border-bottom:1px solid var(--border)">
+          <div style="display:flex;gap:10px;align-items:center;margin-bottom:8px">
+            <div class="avatar avatar-sm" data-avatar-name="{{ req.user.full_name }}" style="background:linear-gradient(135deg,#ec4899,#8b5cf6)">{{ req.user.get_avatar_initials }}</div>
+            <div>
+              <a href="/auth/profile/{{ req.user.id }}/" style="font-weight:600;font-size:0.85rem;color:var(--text-primary)">{{ req.user.full_name }}</a>
+              <div style="font-size:0.72rem;color:var(--text-muted)">{{ req.created_at|timesince }} ago</div>
+            </div>
+          </div>
+          {% if req.message %}
+          <p style="font-size:0.8rem;color:var(--text-secondary);background:var(--bg-glass);padding:8px;border-radius:var(--radius-sm);margin-bottom:8px">"{{ req.message|truncatechars:100 }}"</p>
+          {% endif %}
+          <div style="display:flex;gap:6px">
+            <form method="post" action="/projects/{{ project.id }}/requests/{{ req.id }}/decision/" style="display:inline">
+              {% csrf_token %}<button name="decision" value="approve" class="btn btn-success btn-sm">✓ Approve</button>
+            </form>
+            <form method="post" action="/projects/{{ project.id }}/requests/{{ req.id }}/decision/" style="display:inline">
+              {% csrf_token %}<button name="decision" value="reject" class="btn btn-danger btn-sm">✗ Reject</button>
+            </form>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <!-- Actions -->
+      <div class="card">
+        <div class="section-title">⚡ Actions</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          {% if not is_member and project.status == 'recruiting' %}
+          <a href="/projects/{{ project.id }}/join/" class="btn btn-primary btn-full">✋ Request to Join</a>
+          {% endif %}
+          <a href="/auth/profile/{{ project.owner.id }}/" class="btn btn-secondary btn-full">👤 View Owner Profile</a>
+          {% if not is_owner %}
+          <button class="btn btn-ghost btn-full" data-modal-open="report-modal" style="color:var(--danger)">🚩 Report</button>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="report-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">🚩 Report Project</div>
+      <button class="modal-close" data-modal-close="report-modal">✕</button>
+    </div>
+    <form method="post" action="/social/report/{{ project.owner.id }}/">
+      {% csrf_token %}
+      <div class="form-group"><label class="form-label">Reason</label><input type="text" name="reason" class="form-input" required></div>
+      <div class="form-group"><label class="form-label">Description</label><textarea name="description" class="form-input" rows="3"></textarea></div>
+      <button type="submit" class="btn btn-danger btn-full">Submit Report</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

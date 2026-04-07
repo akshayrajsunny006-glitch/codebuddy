@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% block title %}Create Project{% endblock %}
+
+{% block content %}
+<div class="container-sm" style="padding-top:40px;padding-bottom:60px">
+  <div style="margin-bottom:28px">
+    <a href="/projects/" class="btn btn-ghost btn-sm" style="margin-bottom:16px">← Back to Projects</a>
+    <h1 style="font-size:1.875rem;margin-bottom:6px">Create a Project</h1>
+    <p>Launch your idea and find your dream team.</p>
+  </div>
+
+  <div class="card" style="padding:36px">
+    <form method="post">
+      {% csrf_token %}
+
+      <div style="margin-bottom:24px">
+        <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--primary-light);margin-bottom:16px">
+          📋 Basic Info
+        </div>
+        <div class="form-group">
+          <label class="form-label">Project Title *</label>
+          <input type="text" name="title" class="form-input" placeholder="An amazing project name" required
+                 value="{{ form.title.value|default:'' }}">
+          {% if form.title.errors %}<div class="form-error">{{ form.title.errors.0 }}</div>{% endif %}
+        </div>
+        <div class="form-group">
+          <label class="form-label">One-Line Teaser</label>
+          <input type="text" name="teaser" class="form-input" placeholder="Quick pitch in 10 words..."
+                 value="{{ form.teaser.value|default:'' }}">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description *</label>
+          <textarea name="description" class="form-input" rows="4" placeholder="What is this project about?" required>{{ form.description.value|default:'' }}</textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Full Description (visible to members only)</label>
+          <textarea name="full_description" class="form-input" rows="5" placeholder="Technical details, roadmap, expectations...">{{ form.full_description.value|default:'' }}</textarea>
+        </div>
+      </div>
+
+      <div style="height:1px;background:var(--border);margin:24px 0"></div>
+
+      <div style="margin-bottom:24px">
+        <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--primary-light);margin-bottom:16px">
+          ⚙️ Project Settings
+        </div>
+        <div class="grid grid-2" style="gap:16px">
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Required Skills</label>
+            <input type="text" name="required_skills" class="form-input" placeholder="Python, React, ML..."
+                   value="{{ form.required_skills.value|default:'' }}">
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Max Team Size</label>
+            <input type="number" name="max_team_size" class="form-input" min="1" max="20"
+                   value="{{ form.max_team_size.value|default:'5' }}">
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Difficulty</label>
+            <select name="difficulty" class="form-input">
+              <option value="beginner" {% if form.difficulty.value == 'beginner' %}selected{% endif %}>🌱 Beginner</option>
+              <option value="intermediate" {% if form.difficulty.value == 'intermediate' or not form.difficulty.value %}selected{% endif %}>⚡ Intermediate</option>
+              <option value="advanced" {% if form.difficulty.value == 'advanced' %}selected{% endif %}>🔥 Advanced</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Privacy</label>
+            <select name="privacy_level" class="form-input">
+              <option value="public" {% if form.privacy_level.value == 'public' or not form.privacy_level.value %}selected{% endif %}>🌐 Public</option>
+              <option value="private" {% if form.privacy_level.value == 'private' %}selected{% endif %}>🔒 Private</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Status</label>
+            <select name="status" class="form-input">
+              <option value="recruiting" {% if form.status.value == 'recruiting' or not form.status.value %}selected{% endif %}>🟢 Recruiting</option>
+              <option value="in_progress" {% if form.status.value == 'in_progress' %}selected{% endif %}>🔵 In Progress</option>
+              <option value="paused" {% if form.status.value == 'paused' %}selected{% endif %}>⏸ Paused</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Deadline</label>
+            <input type="date" name="deadline" class="form-input"
+                   value="{{ form.deadline.value|default:'' }}">
+          </div>
+        </div>
+      </div>
+
+      {% if form.errors %}
+      <div class="alert alert-error">Please fix the errors above.</div>
+      {% endif %}
+
+      <div style="display:flex;gap:12px;margin-top:8px">
+        <button type="submit" class="btn btn-primary btn-lg">🚀 Launch Project</button>
+        <a href="/projects/" class="btn btn-secondary btn-lg">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

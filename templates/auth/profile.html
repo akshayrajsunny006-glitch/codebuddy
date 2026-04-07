@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block title %}My Profile{% endblock %}
+{% block content %}
+<div class="container" style="padding-top:36px;padding-bottom:60px">
+  <h1 style="margin-bottom:6px">My Profile</h1>
+  <p style="margin-bottom:28px">Manage your public presence.</p>
+  <div class="two-col">
+    <div class="card" style="padding:32px">
+      <form method="post">
+        {% csrf_token %}
+        <div style="display:flex;gap:16px;align-items:center;margin-bottom:28px;padding-bottom:24px;border-bottom:1px solid var(--border)">
+          <div class="avatar avatar-xl" data-avatar-name="{{ user.full_name }}" style="background:linear-gradient(135deg,#6366f1,#a78bfa)">{{ user.get_avatar_initials }}</div>
+          <div>
+            <div style="font-size:1.2rem;font-weight:700">{{ user.full_name }}</div>
+            <div style="font-size:0.875rem;color:var(--text-muted)">{{ user.email }}</div>
+          </div>
+        </div>
+        <div class="grid grid-2" style="gap:16px">
+          <div class="form-group" style="margin:0"><label class="form-label">Full Name</label><input type="text" name="full_name" class="form-input" value="{{ user.full_name }}"></div>
+          <div class="form-group" style="margin:0"><label class="form-label">College</label><input type="text" name="college_name" class="form-input" value="{{ user.college_name }}"></div>
+          <div class="form-group" style="margin:0"><label class="form-label">Year</label>
+            <select name="year_of_study" class="form-input">
+              <option value="">--</option>
+              <option value="1st" {% if user.year_of_study == '1st' %}selected{% endif %}>1st Year</option>
+              <option value="2nd" {% if user.year_of_study == '2nd' %}selected{% endif %}>2nd Year</option>
+              <option value="3rd" {% if user.year_of_study == '3rd' %}selected{% endif %}>3rd Year</option>
+              <option value="4th" {% if user.year_of_study == '4th' %}selected{% endif %}>4th Year</option>
+              <option value="5th" {% if user.year_of_study == '5th' %}selected{% endif %}>5th Year+</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin:0"><label class="form-label">Phone</label><input type="text" name="phone" class="form-input" value="{{ profile.phone }}"></div>
+        </div>
+        <div class="form-group" style="margin-top:16px"><label class="form-label">Skills</label><input type="text" name="skills" class="form-input" value="{{ user.skills }}" placeholder="Python, React..."></div>
+        <div class="form-group"><label class="form-label">Bio</label><textarea name="bio" class="form-input" rows="4">{{ user.bio }}</textarea></div>
+        <div class="grid grid-2" style="gap:16px">
+          <div class="form-group" style="margin:0"><label class="form-label">LinkedIn</label><input type="url" name="linkedin" class="form-input" value="{{ profile.linkedin }}"></div>
+          <div class="form-group" style="margin:0"><label class="form-label">GitHub</label><input type="url" name="github" class="form-input" value="{{ profile.github }}"></div>
+        </div>
+        <div class="form-group" style="margin-top:16px"><label class="form-label">Certificates</label><textarea name="certificates" class="form-input" rows="2">{{ profile.certificates }}</textarea></div>
+        <div style="display:flex;align-items:center;gap:10px;padding:14px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.2);border-radius:var(--radius-md);margin-bottom:20px">
+          <input type="checkbox" name="available_now" class="form-checkbox" id="av" {% if user.available_now %}checked{% endif %}>
+          <label for="av" style="cursor:pointer;font-size:0.9rem"><span class="available-dot"></span> <strong>Available for new projects</strong></label>
+        </div>
+        <button type="submit" class="btn btn-primary btn-lg">💾 Save Changes</button>
+      </form>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div class="card">
+        <div class="section-title">📊 Stats</div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;justify-content:space-between"><span class="text-secondary text-sm">Projects</span><strong>{{ my_projects|length }}</strong></div>
+          <div style="display:flex;justify-content:space-between"><span class="text-secondary text-sm">Reputation</span><strong style="color:var(--warning)">⭐ {{ user.reputation_score|floatformat:1 }}</strong></div>
+          <div style="display:flex;justify-content:space-between"><span class="text-secondary text-sm">Available</span>{% if user.available_now %}<span class="badge badge-success">Yes</span>{% else %}<span class="badge badge-ghost">No</span>{% endif %}</div>
+          <div style="display:flex;justify-content:space-between"><span class="text-secondary text-sm">Joined</span><span class="text-sm">{{ user.date_joined|date:"M Y" }}</span></div>
+        </div>
+      </div>
+      {% if user.skills %}<div class="card"><div class="section-title">🛠 Skills</div><div class="skills-list">{% for s in user.skills.split %}<span class="skill-tag">{{ s|cut:"," }}</span>{% endfor %}</div></div>{% endif %}
+      {% if my_projects %}<div class="card"><div class="section-title">🗂 Projects</div>{% for pm in my_projects|slice:":5" %}<div style="padding:8px 0;border-bottom:1px solid var(--border)"><a href="/projects/{{ pm.project.id }}/" style="font-size:0.875rem;font-weight:600;color:var(--text-primary);text-decoration:none">{{ pm.project.title }}</a><div style="font-size:0.72rem;color:var(--text-muted)">{{ pm.role }}</div></div>{% endfor %}</div>{% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

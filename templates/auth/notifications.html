@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}Notifications{% endblock %}
+{% block content %}
+<div class="container" style="padding-top:36px;padding-bottom:60px;max-width:680px">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:28px">
+    <div><h1 style="font-size:1.875rem;margin-bottom:4px">Notifications</h1><p>Stay up to date with your campus activity.</p></div>
+  </div>
+  <div class="card" style="padding:0;overflow:hidden">
+    {% for notif in notifications %}
+    <div class="notif-item {% if not notif.is_read %}unread{% endif %}">
+      <div>
+        <div style="font-size:1.1rem">{% if notif.type == 'join_request' %}📬{% elif notif.type == 'request_approved' %}✅{% elif notif.type == 'request_rejected' %}❌{% elif notif.type == 'friend_request' %}👋{% elif notif.type == 'friend_accepted' %}🎉{% else %}🔔{% endif %}</div>
+      </div>
+      <div class="notif-content">
+        {{ notif.content }}
+        {% if notif.link %}<br><a href="{{ notif.link }}" style="font-size:0.78rem;color:var(--primary-light)">View →</a>{% endif %}
+      </div>
+      <div class="notif-time">{{ notif.created_at|timesince }} ago</div>
+    </div>
+    {% empty %}
+    <div class="empty-state"><div class="empty-state-icon">🔔</div><h3>All caught up!</h3><p>No notifications yet.</p></div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

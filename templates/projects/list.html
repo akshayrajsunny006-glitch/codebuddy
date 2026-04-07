@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+{% block title %}Projects{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top:36px;padding-bottom:48px">
+
+  <!-- Header -->
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:28px">
+    <div>
+      <h1 style="font-size:1.875rem;margin-bottom:6px">Campus Projects</h1>
+      <p>Discover projects, find your team, build something great.</p>
+    </div>
+    <a href="/projects/create/" class="btn btn-primary">
+      ➕ New Project
+    </a>
+  </div>
+
+  <!-- Search & Filters -->
+  <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:28px">
+    <form method="get" style="flex:1;min-width:280px">
+      <div class="search-bar">
+        <span class="search-icon">🔍</span>
+        <input type="text" name="q" value="{{ query }}" placeholder="Search projects, skills...">
+        {% if difficulty %}<input type="hidden" name="difficulty" value="{{ difficulty }}">{% endif %}
+        <button type="submit" class="btn btn-primary btn-sm">Search</button>
+      </div>
+    </form>
+
+    <!-- Difficulty filter pills -->
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <a href="?{% if query %}q={{ query }}{% endif %}"
+         class="badge {% if not difficulty %}badge-primary{% else %}badge-ghost{% endif %}"
+         style="cursor:pointer;padding:6px 12px;font-size:0.8rem">All</a>
+      <a href="?{% if query %}q={{ query }}&{% endif %}difficulty=beginner"
+         class="badge {% if difficulty == 'beginner' %}badge-success{% else %}badge-ghost{% endif %}"
+         style="cursor:pointer;padding:6px 12px;font-size:0.8rem">🌱 Beginner</a>
+      <a href="?{% if query %}q={{ query }}&{% endif %}difficulty=intermediate"
+         class="badge {% if difficulty == 'intermediate' %}badge-warning{% else %}badge-ghost{% endif %}"
+         style="cursor:pointer;padding:6px 12px;font-size:0.8rem">⚡ Intermediate</a>
+      <a href="?{% if query %}q={{ query }}&{% endif %}difficulty=advanced"
+         class="badge {% if difficulty == 'advanced' %}badge-danger{% else %}badge-ghost{% endif %}"
+         style="cursor:pointer;padding:6px 12px;font-size:0.8rem">🔥 Advanced</a>
+    </div>
+  </div>
+
+  <!-- Project Grid -->
+  {% if project_data %}
+  <div class="grid grid-auto">
+    {% for item in project_data %}
+    {% with p=item.project %}
+    <div class="project-card">
+      <!-- Top meta -->
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
+        <span class="badge
+          {% if p.difficulty == 'beginner' %}badge-success
+          {% elif p.difficulty == 'intermediate' %}badge-warning
+          {% else %}badge-danger{% endif %}">
+          {{ p.get_difficulty_display }}
+        </span>
+        <span class="badge {% if p.status == 'recruiting' %}badge-primary{% else %}badge-ghost{% endif %}">
+          {{ p.get_status_display }}
+        </span>
+      </div>
+
+      <div>
+        <div class="project-card-title">{{ p.title }}</div>
+        {% if p.teaser %}
+        <p style="font-size:0.875rem;margin-top:6px;color:var(--text-muted);-webkit-line-clamp:2;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden">
+          {{ p.teaser }}
+        </p>
+        {% else %}
+        <p style="font-size:0.875rem;margin-top:6px;color:var(--text-muted);-webkit-line-clamp:2;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden">
+          {{ p.description }}
+        </p>
+        {% endif %}
+      </div>
+
+      {% if p.required_skills %}
+      <div class="skills-list">
+        {% for skill in p.required_skills.split|slice:":4" %}
+        <span class="skill-tag">{{ skill|cut:"," }}</span>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <div class="project-card-footer">
+        <div style="font-size:0.78rem;color:var(--text-muted)">
+          👥 {{ item.member_count }}/{{ p.max_team_size }}
+          {% if p.deadline %} · 📅 {{ p.deadline }}{% endif %}
+        </div>
+
+        {% if item.is_member %}
+        <a href="/projects/{{ p.id }}/" class="btn btn-success btn-sm">Enter Room →</a>
+        {% elif item.has_requested %}
+        <span class="badge badge-warning">Requested</span>
+        {% elif p.status == 'recruiting' %}
+        <a href="/projects/{{ p.id }}/" class="btn btn-primary btn-sm">View →</a>
+        {% else %}
+        <a href="/projects/{{ p.id }}/" class="btn btn-ghost btn-sm">View</a>
+        {% endif %}
+      </div>
+    </div>
+    {% endwith %}
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-state-icon">🔭</div>
+    <h3>No projects found</h3>
+    <p style="margin-bottom:20px">Try a different search or be the first to create one!</p>
+    <a href="/projects/create/" class="btn btn-primary">Create Project</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

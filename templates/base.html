@@ -1,0 +1,81 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}CodeBuddy{% endblock %} — Campus Project Hub</title>
+  <link rel="stylesheet" href="{% static 'css/main.css' %}">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='28'>🚀</text></svg>">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+{% if user.is_authenticated %}
+<!-- ═══ NAVBAR ═══════════════════════════════════════ -->
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="/" class="navbar-brand">⚡ CodeBuddy</a>
+
+    <ul class="navbar-nav">
+      <li><a href="/dashboard/"><span>🏠</span> Dashboard</a></li>
+      <li><a href="/projects/"><span>🗂</span> Projects</a></li>
+      <li><a href="/social/people/"><span>👥</span> People</a></li>
+      <li><a href="/support/"><span>🎧</span> Support</a></li>
+      {% if user.role == 'admin' %}
+      <li><a href="/admin-panel/"><span>🛡</span> Admin</a></li>
+      {% endif %}
+    </ul>
+
+    <div class="navbar-right">
+      <!-- Notifications -->
+      <a href="/auth/notifications/" class="notif-badge btn-ghost btn btn-icon" title="Notifications">
+        <span>🔔</span>
+        {% if unread_notif_count %}
+        <span class="badge-dot"></span>
+        {% endif %}
+      </a>
+
+      <!-- User dropdown -->
+      <div class="dropdown">
+        <button class="avatar-btn" data-avatar-name="{{ user.full_name }}"
+                data-dropdown="user-menu" title="{{ user.full_name }}">
+          {{ user.get_avatar_initials }}
+        </button>
+        <div class="dropdown-menu" id="user-menu">
+          <div style="padding:12px 16px;border-bottom:1px solid var(--border)">
+            <div style="font-weight:700;font-size:0.9rem;color:var(--text-primary)">{{ user.full_name }}</div>
+            <div style="font-size:0.78rem;color:var(--text-muted)">{{ user.email }}</div>
+          </div>
+          <a href="/auth/profile/" class="dropdown-item">👤 My Profile</a>
+          <a href="/auth/notifications/" class="dropdown-item">🔔 Notifications</a>
+          <a href="/projects/create/" class="dropdown-item">➕ New Project</a>
+          <div class="dropdown-divider"></div>
+          <a href="/auth/logout/" class="dropdown-item" style="color:var(--danger)">🚪 Log Out</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+{% endif %}
+
+<!-- ═══ MESSAGES ════════════════════════════════════ -->
+{% if messages %}
+<div style="position:fixed;top:80px;right:24px;z-index:1500;display:flex;flex-direction:column;gap:8px;max-width:360px">
+  {% for message in messages %}
+  <div class="alert alert-{% if message.tags == 'error' %}error{% elif message.tags == 'success' %}success{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}" data-auto-dismiss="4000">
+    {{ message }}
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- ═══ MAIN CONTENT ════════════════════════════════ -->
+<div class="{% if user.is_authenticated %}main-content{% endif %}">
+  {% block content %}{% endblock %}
+</div>
+
+<script src="{% static 'js/main.js' %}"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

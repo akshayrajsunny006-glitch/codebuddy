@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">🚀 Campus Project Platform</div>
+  <h1 class="hero-title">
+    Your <span class="highlight">3D Hub</span><br>for Campus Projects
+  </h1>
+  <p class="hero-subtitle">
+    Discover projects, join teams, build together. CodeBuddy connects students who want to create something amazing.
+  </p>
+  <div class="hero-cta">
+    <a href="/auth/signup/" class="btn btn-primary btn-lg">
+      <span>✨</span> Get Started Free
+    </a>
+    <a href="/auth/login/" class="btn btn-secondary btn-lg">
+      Sign In
+    </a>
+  </div>
+
+  <!-- Floating stats -->
+  <div style="display:flex;gap:32px;margin-top:56px;flex-wrap:wrap;justify-content:center;" class="anim-fade-up anim-delay-3">
+    <div style="text-align:center">
+      <div class="stat-number">{{ stats.users }}+</div>
+      <div class="stat-label">Students</div>
+    </div>
+    <div style="width:1px;background:var(--border)"></div>
+    <div style="text-align:center">
+      <div class="stat-number">{{ stats.projects }}+</div>
+      <div class="stat-label">Active Projects</div>
+    </div>
+    <div style="width:1px;background:var(--border)"></div>
+    <div style="text-align:center">
+      <div class="stat-number">∞</div>
+      <div class="stat-label">Possibilities</div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section style="padding:80px 0;background:var(--bg-surface);border-top:1px solid var(--border)">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:48px">
+      <div class="section-title" style="justify-content:center">What makes us different</div>
+      <h2>Everything a campus team needs</h2>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card anim-fade-up">
+        <div class="feature-icon">🗂</div>
+        <div class="feature-title">Project Discovery</div>
+        <div class="feature-desc">Browse active campus projects by skill, difficulty, and availability. Find your perfect team match.</div>
+      </div>
+      <div class="feature-card anim-fade-up anim-delay-1">
+        <div class="feature-icon">💬</div>
+        <div class="feature-title">Real-Time Chat</div>
+        <div class="feature-desc">Every project gets its own chat room. Coordinate, share updates, and stay in sync.</div>
+      </div>
+      <div class="feature-card anim-fade-up anim-delay-2">
+        <div class="feature-icon">🎯</div>
+        <div class="feature-title">Smart Matching</div>
+        <div class="feature-desc">Get recommended for projects that fit your skills. Project owners see their best candidates automatically.</div>
+      </div>
+      <div class="feature-card anim-fade-up anim-delay-3">
+        <div class="feature-icon">✅</div>
+        <div class="feature-title">Task Board</div>
+        <div class="feature-desc">Keep your team organized with a built-in kanban board. Assign tasks, track progress, ship features.</div>
+      </div>
+      <div class="feature-card anim-fade-up">
+        <div class="feature-icon">👥</div>
+        <div class="feature-title">Campus Network</div>
+        <div class="feature-desc">Connect with classmates, follow each other's journeys, build your professional network on campus.</div>
+      </div>
+      <div class="feature-card anim-fade-up anim-delay-1">
+        <div class="feature-icon">⭐</div>
+        <div class="feature-title">Reputation System</div>
+        <div class="feature-desc">Rate collaborators after projects. Build a reputation score that speaks louder than a résumé.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA SECTION -->
+<section style="padding:80px 24px;text-align:center">
+  <div class="container-sm">
+    <div style="background:linear-gradient(135deg,rgba(99,102,241,0.15),rgba(167,139,250,0.1));border:1px solid rgba(99,102,241,0.2);border-radius:var(--radius-xl);padding:48px 32px">
+      <h2 style="margin-bottom:12px">Ready to build something?</h2>
+      <p style="margin-bottom:28px">Join thousands of students already collaborating on campus.</p>
+      <a href="/auth/signup/" class="btn btn-primary btn-lg">
+        🚀 Create Your Account
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer style="padding:24px;text-align:center;border-top:1px solid var(--border);color:var(--text-muted);font-size:0.8rem">
+  <div class="container">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+      <span>⚡ <strong style="color:var(--text-secondary)">CodeBuddy</strong> — Campus Project Hub</span>
+      <div style="display:flex;gap:16px">
+        <a href="/support/" style="color:var(--text-muted)">Support</a>
+        <a href="/auth/signup/" style="color:var(--text-muted)">Sign Up</a>
+        <a href="/auth/login/" style="color:var(--text-muted)">Login</a>
+      </div>
+    </div>
+  </div>
+</footer>
+{% endblock %}

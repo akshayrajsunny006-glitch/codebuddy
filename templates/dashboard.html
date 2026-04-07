@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top:36px;padding-bottom:48px">
+
+  <!-- Header -->
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:32px">
+    <div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+        <div class="avatar avatar-lg" style="background:linear-gradient(135deg,var(--primary),var(--accent))" data-avatar-name="{{ user.full_name }}">
+          {{ user.get_avatar_initials }}
+        </div>
+        <div>
+          <h1 style="font-size:1.75rem">Hey, {{ user.full_name.split.0 }} 👋</h1>
+          <p style="font-size:0.875rem;margin:0">
+            {% if user.available_now %}
+            <span class="available-dot"></span> Available for projects ·
+            {% endif %}
+            {{ days_since_join }} days on CodeBuddy
+          </p>
+        </div>
+      </div>
+    </div>
+    <a href="/projects/create/" class="btn btn-primary">
+      <span>+</span> New Project
+    </a>
+  </div>
+
+  <!-- Stats row -->
+  <div class="grid grid-4" style="margin-bottom:32px;gap:16px">
+    <div class="stat-card">
+      <div class="stat-number">{{ active_projects|length }}</div>
+      <div class="stat-label">Active Projects</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">{{ past_projects|length }}</div>
+      <div class="stat-label">Completed</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">{{ pending_requests|length }}</div>
+      <div class="stat-label">Pending Requests</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">{{ notifications|length }}</div>
+      <div class="stat-label">Unread Alerts</div>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <!-- Left: Active Projects -->
+    <div>
+      <div class="section-title">🗂 Active Projects</div>
+
+      {% if active_projects %}
+        <div style="display:flex;flex-direction:column;gap:14px">
+          {% for pm in active_projects %}
+          <a href="/projects/{{ pm.project.id }}/" style="text-decoration:none">
+            <div class="project-card">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+                <div class="project-card-title">{{ pm.project.title }}</div>
+                <span class="badge badge-{% if pm.project.status == 'recruiting' %}success{% elif pm.project.status == 'in_progress' %}primary{% else %}ghost{% endif %}">
+                  {{ pm.project.get_status_display }}
+                </span>
+              </div>
+              {% if pm.project.teaser %}
+              <p style="font-size:0.875rem;margin:0;-webkit-line-clamp:2;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden">
+                {{ pm.project.teaser }}
+              </p>
+              {% endif %}
+              <div class="project-card-footer">
+                <div style="display:flex;gap:8px;align-items:center">
+                  <span class="badge badge-ghost">{{ pm.role }}</span>
+                  {% if pm.project.deadline %}
+                  <span style="font-size:0.75rem;color:var(--text-muted)">📅 {{ pm.project.deadline }}</span>
+                  {% endif %}
+                </div>
+                <span style="font-size:0.75rem;color:var(--primary-light)">Open →</span>
+              </div>
+            </div>
+          </a>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty-state">
+          <div class="empty-state-icon">🌱</div>
+          <h3>No active projects yet</h3>
+          <p style="margin-bottom:16px">Join or create your first project!</p>
+          <a href="/projects/" class="btn btn-primary btn-sm">Browse Projects</a>
+        </div>
+      {% endif %}
+
+      <!-- Past Projects -->
+      {% if past_projects %}
+      <div class="section-title" style="margin-top:32px">📦 Past Projects</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        {% for pm in past_projects %}
+        <div class="card" style="padding:16px;opacity:0.7">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="font-weight:600;font-size:0.9rem">{{ pm.project.title }}</span>
+            <span class="badge badge-ghost">Completed</span>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Right sidebar -->
+    <div style="display:flex;flex-direction:column;gap:20px">
+
+      <!-- Pending Join Requests -->
+      {% if pending_requests %}
+      <div class="card">
+        <div class="section-title">📬 Incoming Requests</div>
+        {% for req in pending_requests %}
+        <div style="display:flex;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)">
+          <div class="avatar avatar-md" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)" data-avatar-name="{{ req.user.full_name }}">
+            {{ req.user.get_avatar_initials }}
+          </div>
+          <div style="flex:1;min-width:0">
+            <div style="font-weight:600;font-size:0.875rem;color:var(--text-primary)">{{ req.user.full_name }}</div>
+            <div style="font-size:0.75rem;color:var(--text-muted);truncate">wants to join <strong>{{ req.project.title }}</strong></div>
+          </div>
+          <a href="/projects/{{ req.project.id }}/" class="btn btn-ghost btn-sm">View</a>
+        </div>
+        {% endfor %}
+        <a href="/projects/" class="btn btn-secondary btn-sm btn-full" style="margin-top:12px">Manage All</a>
+      </div>
+      {% endif %}
+
+      <!-- Notifications -->
+      {% if notifications %}
+      <div class="card">
+        <div class="section-title">🔔 Recent Alerts</div>
+        {% for notif in notifications %}
+        <div class="notif-item unread" style="padding:10px 0;border-color:var(--border)">
+          <div class="notif-content">{{ notif.content }}</div>
+          <div class="notif-time">{{ notif.created_at|timesince }} ago</div>
+        </div>
+        {% endfor %}
+        <a href="/auth/notifications/" class="btn btn-secondary btn-sm btn-full" style="margin-top:12px">All Notifications</a>
+      </div>
+      {% endif %}
+
+      <!-- Quick Links -->
+      <div class="card">
+        <div class="section-title">⚡ Quick Actions</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <a href="/projects/create/" class="btn btn-primary btn-full">➕ Create Project</a>
+          <a href="/projects/" class="btn btn-secondary btn-full">🔍 Browse Projects</a>
+          <a href="/social/people/" class="btn btn-secondary btn-full">👥 Find People</a>
+          <a href="/auth/profile/" class="btn btn-secondary btn-full">✏️ Edit Profile</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

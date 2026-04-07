@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% block title %}{{ profile_user.full_name }}{% endblock %}
+{% block content %}
+<div class="container" style="padding-top:36px;padding-bottom:60px">
+  <a href="/social/people/" class="btn btn-ghost btn-sm" style="margin-bottom:20px">← People</a>
+  <div class="profile-header">
+    <div class="avatar avatar-xl" data-avatar-name="{{ profile_user.full_name }}" style="background:linear-gradient(135deg,#6366f1,#a78bfa)">{{ profile_user.get_avatar_initials }}</div>
+    <div class="profile-info">
+      <div class="profile-name">{{ profile_user.full_name }}</div>
+      <div class="profile-college">{% if profile_user.college_name %}{{ profile_user.college_name }}{% if profile_user.year_of_study %} · {{ profile_user.year_of_study }} Year{% endif %}{% endif %}</div>
+      {% if profile_user.bio %}<p style="font-size:0.9rem;margin-bottom:14px">{{ profile_user.bio }}</p>{% endif %}
+      {% if profile_user.skills %}
+      <div class="skills-list" style="margin-bottom:14px">
+        {% for s in profile_user.skills.split %}<span class="skill-tag">{{ s|cut:"," }}</span>{% endfor %}
+      </div>
+      {% endif %}
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        {% if profile_user.available_now %}<span class="badge badge-success"><span class="available-dot"></span> Available</span>{% endif %}
+        <span style="font-size:0.8rem;color:var(--text-muted)">⭐ {{ profile_user.reputation_score|floatformat:1 }} rep · Joined {{ profile_user.date_joined|date:"M Y" }}</span>
+      </div>
+    </div>
+    {% if request.user.is_authenticated and request.user != profile_user %}
+    <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
+      {% if is_friend %}
+        <span class="badge badge-success" style="padding:8px 14px">✓ Connected</span>
+      {% elif friend_request_sent %}
+        <span class="badge badge-warning" style="padding:8px 14px">Request Sent</span>
+      {% elif not is_blocked %}
+        <form method="post" action="/social/friend-request/{{ profile_user.id }}/">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-primary">➕ Connect</button>
+        </form>
+      {% endif %}
+      <form method="post" action="/social/block/{{ profile_user.id }}/">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-ghost btn-sm" style="color:var(--danger)">{% if is_blocked %}Unblock{% else %}Block{% endif %}</button>
+      </form>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="two-col" style="margin-top:24px">
+    <div>
+      {% if my_projects %}
+      <div class="section-title">🗂 Projects</div>
+      <div class="grid grid-auto">
+        {% for pm in my_projects %}
+        <div class="card" style="padding:16px">
+          <a href="/projects/{{ pm.project.id }}/" style="font-weight:700;color:var(--text-primary);text-decoration:none">{{ pm.project.title }}</a>
+          <div style="font-size:0.75rem;color:var(--text-muted);margin-top:4px">{{ pm.role }}</div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state"><div class="empty-state-icon">🗂</div><h3>No projects yet</h3></div>
+      {% endif %}
+    </div>
+    <div style="display:flex;flex-direction:column;gap:16px">
+      {% if profile.linkedin or profile.github %}
+      <div class="card">
+        <div class="section-title">🔗 Links</div>
+        {% if profile.linkedin %}<a href="{{ profile.linkedin }}" target="_blank" class="btn btn-secondary btn-full" style="margin-bottom:8px">LinkedIn ↗</a>{% endif %}
+        {% if profile.github %}<a href="{{ profile.github }}" target="_blank" class="btn btn-secondary btn-full">GitHub ↗</a>{% endif %}
+      </div>
+      {% endif %}
+      {% if request.user.is_authenticated and request.user != profile_user %}
+      <div class="card">
+        <div class="section-title">⚡ Actions</div>
+        <button class="btn btn-ghost btn-full" data-modal-open="report-user-modal" style="color:var(--danger)">🚩 Report User</button>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="report-user-modal">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">🚩 Report User</div><button class="modal-close" data-modal-close="report-user-modal">✕</button></div>
+    <form method="post" action="/social/report/{{ profile_user.id }}/">
+      {% csrf_token %}
+      <div class="form-group"><label class="form-label">Reason</label><input type="text" name="reason" class="form-input" required></div>
+      <div class="form-group"><label class="form-label">Description</label><textarea name="description" class="form-input" rows="3"></textarea></div>
+      <button type="submit" class="btn btn-danger btn-full">Submit Report</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

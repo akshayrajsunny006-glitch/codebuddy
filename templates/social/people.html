@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+{% load social_filters %}
+{% block title %}People{% endblock %}
+{% block content %}
+<div class="container" style="padding-top:36px;padding-bottom:60px">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px;margin-bottom:28px">
+    <div><h1 style="font-size:1.875rem;margin-bottom:6px">People</h1><p>Connect with campus builders.</p></div>
+  </div>
+
+  <form method="get" style="margin-bottom:28px">
+    <div class="search-bar" style="max-width:500px">
+      <span class="search-icon">🔍</span>
+      <input type="text" name="q" value="{{ query }}" placeholder="Search by name, skills, or email...">
+      <button type="submit" class="btn btn-primary btn-sm">Search</button>
+    </div>
+  </form>
+
+  {% if query and search_results %}
+  <div class="section-title">Results for "{{ query }}"</div>
+  <div class="grid grid-auto" style="margin-bottom:36px">
+    {% for item in search_results %}
+    {% with u=item.user %}
+    <div class="card">
+      <div style="display:flex;gap:12px;align-items:flex-start">
+        <a href="/auth/profile/{{ u.id }}/">
+          <div class="avatar avatar-lg" data-avatar-name="{{ u.full_name }}" style="background:linear-gradient(135deg,#6366f1,#a78bfa)">{{ u.get_avatar_initials }}</div>
+        </a>
+        <div style="flex:1;min-width:0">
+          <a href="/auth/profile/{{ u.id }}/" style="font-weight:700;color:var(--text-primary);text-decoration:none;font-size:0.95rem">{{ u.full_name }}</a>
+          {% if u.college_name %}<div style="font-size:0.75rem;color:var(--text-muted)">{{ u.college_name }}</div>{% endif %}
+          {% if u.skills %}<div class="skills-list" style="margin-top:6px">{% for s in u.skills.split|slice:":3" %}<span class="skill-tag" style="font-size:0.68rem">{{ s|cut:"," }}</span>{% endfor %}</div>{% endif %}
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;margin-top:12px;flex-wrap:wrap">
+        {% if item.is_friend %}
+          <span class="badge badge-success">✓ Connected</span>
+        {% elif item.is_blocked %}
+          <form method="post" action="/social/block/{{ u.id }}/">{% csrf_token %}<button type="submit" class="btn btn-ghost btn-sm">Unblock</button></form>
+        {% elif item.request_sent %}
+          <span class="badge badge-warning">Requested</span>
+        {% else %}
+          <form method="post" action="/social/friend-request/{{ u.id }}/">{% csrf_token %}<button type="submit" class="btn btn-primary btn-sm">➕ Connect</button></form>
+        {% endif %}
+        {% if not item.is_blocked %}
+          <form method="post" action="/social/block/{{ u.id }}/">{% csrf_token %}<button type="submit" class="btn btn-ghost btn-sm" style="color:var(--danger)">Block</button></form>
+        {% endif %}
+      </div>
+    </div>
+    {% endwith %}
+    {% endfor %}
+  </div>
+  {% elif query %}
+  <div class="empty-state" style="margin-bottom:36px"><div class="empty-state-icon">🔭</div><h3>No results for "{{ query }}"</h3></div>
+  {% endif %}
+
+  <div class="two-col">
+    <div>
+      <div class="section-title">👥 Your Connections ({{ friends|length }})</div>
+      {% if friends %}
+      <div class="grid grid-auto">
+        {% for friend in friends %}
+        <div class="card" style="padding:16px">
+          <div style="display:flex;gap:12px;align-items:center">
+            <a href="/auth/profile/{{ friend.id }}/">
+              <div class="avatar avatar-md" data-avatar-name="{{ friend.full_name }}" style="background:linear-gradient(135deg,#10b981,#3b82f6)">{{ friend.get_avatar_initials }}</div>
+            </a>
+            <div style="flex:1;min-width:0">
+              <a href="/auth/profile/{{ friend.id }}/" style="font-weight:600;font-size:0.9rem;color:var(--text-primary);text-decoration:none">{{ friend.full_name }}</a>
+              {% if friend.college_name %}<div style="font-size:0.75rem;color:var(--text-muted)">{{ friend.college_name }}</div>{% endif %}
+            </div>
+            {% if friend.available_now %}<span class="available-dot" title="Available"></span>{% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state"><div class="empty-state-icon">👋</div><h3>No connections yet</h3><p>Search above to find people!</p></div>
+      {% endif %}
+    </div>
+
+    <div>
+      {% if incoming_requests %}
+      <div class="section-title">📬 Friend Requests ({{ incoming_requests|length }})</div>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:28px">
+        {% for req in incoming_requests %}
+        <div class="card" style="padding:16px">
+          <div style="display:flex;gap:10px;align-items:center;margin-bottom:10px">
+            <div class="avatar avatar-md" data-avatar-name="{{ req.from_user.full_name }}" style="background:linear-gradient(135deg,#ec4899,#8b5cf6)">{{ req.from_user.get_avatar_initials }}</div>
+            <div>
+              <a href="/auth/profile/{{ req.from_user.id }}/" style="font-weight:600;color:var(--text-primary);text-decoration:none">{{ req.from_user.full_name }}</a>
+              <div style="font-size:0.72rem;color:var(--text-muted)">{{ req.created_at|timesince }} ago</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:6px">
+            <form method="post" action="/social/friend-request/{{ req.id }}/decision/">{% csrf_token %}<button name="decision" value="accept" class="btn btn-success btn-sm">✓ Accept</button></form>
+            <form method="post" action="/social/friend-request/{{ req.id }}/decision/">{% csrf_token %}<button name="decision" value="reject" class="btn btn-ghost btn-sm">✗ Ignore</button></form>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <div class="card">
+        <div class="section-title">💡 Discover People</div>
+        <p style="font-size:0.875rem;margin-bottom:16px">Search for classmates by skill or name.</p>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          {% for skill in "Python,React,ML,Design,Node.js,Java,Flutter"|split:"," %}
+          <a href="?q={{ skill }}" class="skill-tag" style="cursor:pointer;text-decoration:none">{{ skill }}</a>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

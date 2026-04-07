@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% block title %}Sign Up{% endblock %}
+
+{% block content %}
+<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px 24px;background:var(--bg-base)">
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse 700px 600px at 50% 30%,rgba(99,102,241,0.08) 0%,transparent 70%);pointer-events:none"></div>
+
+  <div style="width:100%;max-width:560px;position:relative">
+    <div style="text-align:center;margin-bottom:32px">
+      <a href="/" class="navbar-brand" style="font-size:1.75rem;display:block;margin-bottom:8px">⚡ CodeBuddy</a>
+      <p style="color:var(--text-muted);font-size:0.9rem">Join thousands of campus builders</p>
+    </div>
+
+    <div class="card" style="padding:36px">
+      <h2 style="margin-bottom:4px;font-size:1.5rem">Create your account</h2>
+      <p style="margin-bottom:28px;font-size:0.875rem">Fill in your details to get started</p>
+
+      <form method="post">
+        {% csrf_token %}
+
+        <div class="grid grid-2" style="gap:16px">
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Full Name *</label>
+            <input type="text" name="full_name" class="form-input" placeholder="Jane Smith"
+                   value="{{ form.full_name.value|default:'' }}" required>
+            {% if form.full_name.errors %}<div class="form-error">{{ form.full_name.errors.0 }}</div>{% endif %}
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Email *</label>
+            <input type="email" name="email" class="form-input" placeholder="jane@college.edu"
+                   value="{{ form.email.value|default:'' }}" required>
+            {% if form.email.errors %}<div class="form-error">{{ form.email.errors.0 }}</div>{% endif %}
+          </div>
+        </div>
+
+        <div class="grid grid-2" style="gap:16px;margin-top:16px">
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Password *</label>
+            <input type="password" name="password" class="form-input" placeholder="••••••••" required>
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Confirm Password *</label>
+            <input type="password" name="password2" class="form-input" placeholder="••••••••" required>
+          </div>
+        </div>
+
+        <div style="height:1px;background:var(--border);margin:20px 0"></div>
+
+        <div class="grid grid-2" style="gap:16px">
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">College</label>
+            <input type="text" name="college_name" class="form-input" placeholder="MIT, Stanford..."
+                   value="{{ form.college_name.value|default:'' }}">
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Year of Study</label>
+            <select name="year_of_study" class="form-input">
+              <option value="">Select year</option>
+              <option value="1st">1st Year</option>
+              <option value="2nd">2nd Year</option>
+              <option value="3rd">3rd Year</option>
+              <option value="4th">4th Year</option>
+              <option value="5th">5th Year+</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-2" style="gap:16px;margin-top:16px">
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Age</label>
+            <input type="number" name="age" class="form-input" placeholder="20" min="16" max="40"
+                   value="{{ form.age.value|default:'' }}">
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Gender</label>
+            <select name="gender" class="form-input">
+              <option value="">Prefer not to say</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="non_binary">Non-Binary</option>
+              <option value="prefer_not">Prefer not to say</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top:16px">
+          <label class="form-label">Skills (comma separated)</label>
+          <input type="text" name="skills" class="form-input" placeholder="Python, React, ML, UI/UX..."
+                 value="{{ form.skills.value|default:'' }}">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Bio</label>
+          <textarea name="bio" class="form-input" rows="3" placeholder="Tell us a bit about yourself and what you want to build...">{{ form.bio.value|default:'' }}</textarea>
+        </div>
+
+        {% if form.non_field_errors %}
+        <div class="alert alert-error" style="margin-bottom:16px">
+          {% for err in form.non_field_errors %}{{ err }}{% endfor %}
+        </div>
+        {% endif %}
+        {% if form.errors %}
+          {% for field, errors in form.errors.items %}
+            {% if field != '__all__' %}
+            <div class="alert alert-error" style="margin-bottom:8px">{{ field }}: {{ errors.0 }}</div>
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+
+        <button type="submit" class="btn btn-primary btn-full btn-lg" style="margin-top:8px">
+          🚀 Create Account
+        </button>
+      </form>
+
+      <div class="divider"></div>
+      <p style="text-align:center;font-size:0.875rem;color:var(--text-muted)">
+        Already have an account?
+        <a href="/auth/login/" style="color:var(--primary-light);font-weight:600">Sign in</a>
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}

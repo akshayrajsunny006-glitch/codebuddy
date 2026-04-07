@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}Join {{ project.title }}{% endblock %}
+{% block content %}
+<div class="container-sm" style="padding-top:40px;padding-bottom:60px">
+  <a href="/projects/{{ project.id }}/" class="btn btn-ghost btn-sm" style="margin-bottom:24px">← Back to Project</a>
+  <div class="card" style="padding:36px">
+    <div style="text-align:center;margin-bottom:28px">
+      <div style="font-size:2.5rem;margin-bottom:12px">✋</div>
+      <h2 style="margin-bottom:6px">Request to Join</h2>
+      <p>Applying to <strong style="color:var(--primary-light)">{{ project.title }}</strong></p>
+    </div>
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-group">
+        <label class="form-label">Why do you want to join? (Optional)</label>
+        <textarea name="message" class="form-input" rows="5" placeholder="Tell them about your skills and motivation..."></textarea>
+      </div>
+      <div style="display:flex;gap:12px">
+        <button type="submit" class="btn btn-primary btn-lg">Send Request 📨</button>
+        <a href="/projects/{{ project.id }}/" class="btn btn-secondary btn-lg">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
