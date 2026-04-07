@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load social_filters %}
 {% block title %}My Profile{% endblock %}
 {% block content %}
 <div class="container" style="padding-top:36px;padding-bottom:60px">
@@ -6,14 +7,25 @@
   <p style="margin-bottom:28px">Manage your public presence.</p>
   <div class="two-col">
     <div class="card" style="padding:32px">
-      <form method="post">
+      <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <div style="display:flex;gap:16px;align-items:center;margin-bottom:28px;padding-bottom:24px;border-bottom:1px solid var(--border)">
-          <div class="avatar avatar-xl" data-avatar-name="{{ user.full_name }}" style="background:linear-gradient(135deg,#6366f1,#a78bfa)">{{ user.get_avatar_initials }}</div>
+          {% if user|get_user_avatar %}
+            <img src="{{ user|get_user_avatar }}" alt="Profile Photo" class="avatar avatar-xl" style="object-fit:cover;border-radius:50%">
+          {% else %}
+            <div class="avatar avatar-xl" data-avatar-name="{{ user.full_name }}" style="background:linear-gradient(135deg,#6366f1,#a78bfa)">{{ user.get_avatar_initials }}</div>
+          {% endif %}
           <div>
             <div style="font-size:1.2rem;font-weight:700">{{ user.full_name }}</div>
             <div style="font-size:0.875rem;color:var(--text-muted)">{{ user.email }}</div>
           </div>
+        </div>
+        <div class="form-group" style="margin-bottom:20px">
+          <label class="form-label">Profile Photo</label>
+          <input type="file" name="profile_photo" class="form-input" accept="image/*">
+          {% if user.profile_photo %}
+            <small style="color:var(--text-muted)">Current photo: <a href="{{ user.profile_photo.url }}" target="_blank">{{ user.profile_photo.name }}</a></small>
+          {% endif %}
         </div>
         <div class="grid grid-2" style="gap:16px">
           <div class="form-group" style="margin:0"><label class="form-label">Full Name</label><input type="text" name="full_name" class="form-input" value="{{ user.full_name }}"></div>

@@ -65,7 +65,7 @@ class SignupForm(forms.ModelForm):
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = User
-        fields = ['full_name', 'bio', 'skills', 'college_name', 'year_of_study', 'available_now', 'preferred_roles']
+        fields = ['full_name', 'bio', 'skills', 'college_name', 'year_of_study', 'available_now', 'preferred_roles', 'profile_photo']
         widgets = {
             'full_name': forms.TextInput(attrs={'class': 'form-input'}),
             'bio': forms.Textarea(attrs={'class': 'form-input', 'rows': 4}),
@@ -73,6 +73,7 @@ class ProfileForm(forms.ModelForm):
             'college_name': forms.TextInput(attrs={'class': 'form-input'}),
             'year_of_study': forms.Select(attrs={'class': 'form-input'}),
             'available_now': forms.CheckboxInput(attrs={'class': 'form-checkbox'}),
+            'profile_photo': forms.FileInput(attrs={'class': 'form-input', 'accept': 'image/*'}),
         }
 
     phone = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'form-input'}))

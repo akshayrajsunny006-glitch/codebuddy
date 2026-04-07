@@ -90,7 +90,7 @@ def profile_view(request):
     profile, _ = UserProfile.objects.get_or_create(user=user)
 
     if request.method == 'POST':
-        form = ProfileForm(request.POST, instance=user)
+        form = ProfileForm(request.POST, request.FILES, instance=user)
         if form.is_valid():
             form.save()
             profile.phone = form.cleaned_data.get('phone', '')

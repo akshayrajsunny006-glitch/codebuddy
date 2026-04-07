@@ -48,6 +48,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     available_now = models.BooleanField(default=False)
     reputation_score = models.FloatField(default=0.0)
     avatar = models.CharField(max_length=10, blank=True)  # emoji avatar
+    profile_photo = models.ImageField(upload_to='profile_photos/', blank=True, null=True)  # profile photo upload
 
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
